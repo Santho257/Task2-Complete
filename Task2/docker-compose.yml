@@ -1,0 +1,50 @@
+version: '3.8'
+services:
+  frontend:
+    build:
+      context: ./Front End
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on: 
+      - backend
+    networks:
+      - app_network
+
+  backend:
+    build:
+      context: ./Back End
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - ELASTIC_HOST=elasticsearch
+      - DATABASE_HOST=sql6.freesqldatabase.com
+      - DATABASE_USER=sql6685437
+      - DATABASE_PASSWORD=auxgYCyZgt
+      - DATABASE_NAME=sql6685437
+    depends_on:
+      - elasticsearch
+    networks:
+      - app_network
+  
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.1
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+    environment:
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - app_network
+
+volumes:
+  esdata:
+    driver: local
+
+networks:
+  app_network:
+    driver: bridge
